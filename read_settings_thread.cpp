@@ -588,7 +588,7 @@ void read_settings_thread::run()
       }
   }
 
-  if((devparms->modelserie != 1) && (devparms->modelserie != 2))
+  if((devparms->modelserie != 1) && (devparms->modelserie != 2) && (devparms->modelserie != 5))
   {
     usleep(TMC_GDS_DELAY);
 
@@ -821,99 +821,9 @@ void read_settings_thread::run()
 
   usleep(TMC_GDS_DELAY);
 
-  if(tmc_write(":TRIG:EDG:SLOP?") != 15)
+  if(devparms->modelserie != 5)
   {
-    line = __LINE__;
-    goto GDS_OUT_ERROR;
-  }
-
-  if(tmc_read() < 1)
-  {
-    line = __LINE__;
-    goto GDS_OUT_ERROR;
-  }
-
-  if(!strcmp(device->buf, "POS"))
-  {
-    devparms->triggeredgeslope = 0;
-  }
-  else if(!strcmp(device->buf, "NEG"))
-    {
-      devparms->triggeredgeslope = 1;
-    }
-    else if(!strcmp(device->buf, "RFAL"))
-      {
-        devparms->triggeredgeslope = 2;
-      }
-      else
-      {
-        line = __LINE__;
-        goto GDS_OUT_ERROR;
-      }
-
-  usleep(TMC_GDS_DELAY);
-
-  if(tmc_write(":TRIG:EDG:SOUR?") != 15)
-  {
-    line = __LINE__;
-    goto GDS_OUT_ERROR;
-  }
-
-  if(tmc_read() < 1)
-  {
-    line = __LINE__;
-    goto GDS_OUT_ERROR;
-  }
-
-  if(!strcmp(device->buf, "CHAN1"))
-  {
-    devparms->triggeredgesource = 0;
-  }
-  else if(!strcmp(device->buf, "CHAN2"))
-    {
-      devparms->triggeredgesource = 1;
-    }
-    else if(!strcmp(device->buf, "CHAN3"))
-      {
-        devparms->triggeredgesource = 2;
-      }
-      else if(!strcmp(device->buf, "CHAN4"))
-        {
-          devparms->triggeredgesource = 3;
-        }
-        else if(!strcmp(device->buf, "EXT"))
-          {
-            devparms->triggeredgesource = 4;
-          }
-          else if(!strcmp(device->buf, "EXT5"))
-            {
-              devparms->triggeredgesource = 5;
-            }  // DS1000Z: "AC", DS6000: "ACL" !!
-            else if((!strcmp(device->buf, "AC")) || (!strcmp(device->buf, "ACL")))
-              {
-                devparms->triggeredgesource = 6;
-              }
-              else
-              {
-                line = __LINE__;
-                goto GDS_OUT_ERROR;
-              }
-
-  for(chn=0; chn<devparms->channel_cnt; chn++)
-  {
-    snprintf(str, 512, ":TRIG:EDG:SOUR CHAN%i", chn + 1);
-
-    usleep(TMC_GDS_DELAY);
-
-    if(tmc_write(str) != 20)
-    {
-      line = __LINE__;
-      goto GDS_OUT_ERROR;
-    }
-
-    usleep(TMC_GDS_DELAY);
-
-    if(tmc_write(":TRIG:EDG:LEV?") != 14)
+    if(tmc_write(":TRIG:EDG:SLOP?") != 15)
     {
       line = __LINE__;
       goto GDS_OUT_ERROR;
@@ -925,55 +835,303 @@ void read_settings_thread::run()
       goto GDS_OUT_ERROR;
     }
 
-    devparms->triggeredgelevel[chn] = atof(device->buf);
-  }
-
-  if(devparms->triggeredgesource < 4)
-  {
-    snprintf(str, 512, ":TRIG:EDG:SOUR CHAN%i", devparms->triggeredgesource + 1);
+    if(!strcmp(device->buf, "POS"))
+    {
+      devparms->triggeredgeslope = 0;
+    }
+    else if(!strcmp(device->buf, "NEG"))
+      {
+        devparms->triggeredgeslope = 1;
+      }
+      else if(!strcmp(device->buf, "RFAL"))
+        {
+          devparms->triggeredgeslope = 2;
+        }
+        else
+        {
+          line = __LINE__;
+          goto GDS_OUT_ERROR;
+        }
 
     usleep(TMC_GDS_DELAY);
 
-    if(tmc_write(str) != 20)
+    if(tmc_write(":TRIG:EDG:SOUR?") != 15)
     {
       line = __LINE__;
       goto GDS_OUT_ERROR;
     }
-  }
 
-  if(devparms->triggeredgesource== 4)
-  {
-    usleep(TMC_GDS_DELAY);
-
-    if(tmc_write(":TRIG:EDG:SOUR EXT") != 18)
+    if(tmc_read() < 1)
     {
       line = __LINE__;
       goto GDS_OUT_ERROR;
     }
+
+    if(!strcmp(device->buf, "CHAN1"))
+    {
+      devparms->triggeredgesource = 0;
+    }
+    else if(!strcmp(device->buf, "CHAN2"))
+      {
+        devparms->triggeredgesource = 1;
+      }
+      else if(!strcmp(device->buf, "CHAN3"))
+        {
+          devparms->triggeredgesource = 2;
+        }
+        else if(!strcmp(device->buf, "CHAN4"))
+          {
+            devparms->triggeredgesource = 3;
+          }
+          else if(!strcmp(device->buf, "EXT"))
+            {
+              devparms->triggeredgesource = 4;
+            }
+            else if(!strcmp(device->buf, "EXT5"))
+              {
+                devparms->triggeredgesource = 5;
+              }  // DS1000Z: "AC", DS6000: "ACL" !!
+              else if((!strcmp(device->buf, "AC")) || (!strcmp(device->buf, "ACL")))
+                {
+                  devparms->triggeredgesource = 6;
+                }
+                else
+                {
+                  line = __LINE__;
+                  goto GDS_OUT_ERROR;
+                }
+
+    for(chn=0; chn<devparms->channel_cnt; chn++)
+    {
+      snprintf(str, 512, ":TRIG:EDG:SOUR CHAN%i", chn + 1);
+
+      usleep(TMC_GDS_DELAY);
+
+      if(tmc_write(str) != 20)
+      {
+        line = __LINE__;
+        goto GDS_OUT_ERROR;
+      }
+
+      usleep(TMC_GDS_DELAY);
+
+      if(tmc_write(":TRIG:EDG:LEV?") != 14)
+      {
+        line = __LINE__;
+        goto GDS_OUT_ERROR;
+      }
+
+      if(tmc_read() < 1)
+      {
+        line = __LINE__;
+        goto GDS_OUT_ERROR;
+      }
+
+      devparms->triggeredgelevel[chn] = atof(device->buf);
+    }
+
+    if(devparms->triggeredgesource < 4)
+    {
+      snprintf(str, 512, ":TRIG:EDG:SOUR CHAN%i", devparms->triggeredgesource + 1);
+
+      usleep(TMC_GDS_DELAY);
+
+      if(tmc_write(str) != 20)
+      {
+        line = __LINE__;
+        goto GDS_OUT_ERROR;
+      }
+    }
+
+    if(devparms->triggeredgesource== 4)
+    {
+      usleep(TMC_GDS_DELAY);
+
+      if(tmc_write(":TRIG:EDG:SOUR EXT") != 18)
+      {
+        line = __LINE__;
+        goto GDS_OUT_ERROR;
+      }
+    }
+
+    if(devparms->triggeredgesource== 5)
+    {
+      usleep(TMC_GDS_DELAY);
+
+      if(tmc_write(":TRIG:EDG:SOUR EXT5") != 19)
+      {
+        line = __LINE__;
+        goto GDS_OUT_ERROR;
+      }
+    }
+
+    if(devparms->triggeredgesource== 6)
+    {
+      usleep(TMC_GDS_DELAY);
+
+      if(tmc_write(":TRIG:EDG:SOUR AC") != 17)
+      {
+        line = __LINE__;
+        goto GDS_OUT_ERROR;
+      }
+    }
   }
-
-  if(devparms->triggeredgesource== 5)
+  else
   {
-    usleep(TMC_GDS_DELAY);
-
-    if(tmc_write(":TRIG:EDG:SOUR EXT5") != 19)
+    if(tmc_write(":TRIG:EDGE:SLOP?") != 16)
     {
       line = __LINE__;
       goto GDS_OUT_ERROR;
     }
-  }
 
-  if(devparms->triggeredgesource== 6)
-  {
-    usleep(TMC_GDS_DELAY);
-
-    if(tmc_write(":TRIG:EDG:SOUR AC") != 17)
+    if(tmc_read() < 1)
     {
       line = __LINE__;
       goto GDS_OUT_ERROR;
     }
-  }
 
+    if(!strcmp(device->buf, "POS"))
+    {
+      devparms->triggeredgeslope = 0;
+    }
+    else if(!strcmp(device->buf, "NEG"))
+      {
+        devparms->triggeredgeslope = 1;
+      }
+      else if(!strcmp(device->buf, "RFAL"))
+        {
+          devparms->triggeredgeslope = 2;
+        }
+        else
+        {
+          line = __LINE__;
+          goto GDS_OUT_ERROR;
+        }
+
+    usleep(TMC_GDS_DELAY);
+
+    if(tmc_write(":TRIG:EDGE:SOUR?") != 16)
+    {
+      line = __LINE__;
+      goto GDS_OUT_ERROR;
+    }
+
+    if(tmc_read() < 1)
+    {
+      line = __LINE__;
+      goto GDS_OUT_ERROR;
+    }
+
+    if(!strcmp(device->buf, "CHAN1"))
+    {
+      devparms->triggeredgesource = 0;
+    }
+    else if(!strcmp(device->buf, "CHAN2"))
+      {
+        devparms->triggeredgesource = 1;
+      }
+      else if(!strcmp(device->buf, "CHAN3"))
+        {
+          devparms->triggeredgesource = 2;
+        }
+        else if(!strcmp(device->buf, "CHAN4"))
+          {
+            devparms->triggeredgesource = 3;
+          }
+          else if(!strcmp(device->buf, "EXT"))
+            {
+              devparms->triggeredgesource = 4;
+            }
+            else if(!strcmp(device->buf, "EXT5"))
+              {
+                devparms->triggeredgesource = 5;
+              }  // DS1000Z: "AC", DS6000: "ACL" !!
+              else if((!strcmp(device->buf, "AC")) || (!strcmp(device->buf, "ACL")))
+                {
+                  devparms->triggeredgesource = 6;
+                }
+                else
+                {
+                  line = __LINE__;
+                  goto GDS_OUT_ERROR;
+                }
+
+    for(chn=0; chn<devparms->channel_cnt; chn++)
+    {
+      snprintf(str, 512, ":TRIG:EDGE:SOUR CHAN%i", chn + 1);
+
+      usleep(TMC_GDS_DELAY);
+
+      if(tmc_write(str) != 21)
+      {
+        line = __LINE__;
+        goto GDS_OUT_ERROR;
+      }
+
+      usleep(TMC_GDS_DELAY);
+
+      if(tmc_write(":TRIG:EDGE:LEV?") != 15)
+      {
+        line = __LINE__;
+        goto GDS_OUT_ERROR;
+      }
+
+      if(tmc_read() < 1)
+      {
+        line = __LINE__;
+        goto GDS_OUT_ERROR;
+      }
+
+      devparms->triggeredgelevel[chn] = atof(device->buf);
+    }
+
+    if(devparms->triggeredgesource < 4)
+    {
+      snprintf(str, 512, ":TRIG:EDGE:SOUR CHAN%i", devparms->triggeredgesource + 1);
+
+      usleep(TMC_GDS_DELAY);
+
+      if(tmc_write(str) != 21)
+      {
+        line = __LINE__;
+        goto GDS_OUT_ERROR;
+      }
+    }
+
+    if(devparms->triggeredgesource== 4)
+    {
+      usleep(TMC_GDS_DELAY);
+
+      if(tmc_write(":TRIG:EDGE:SOUR EXT") != 19)
+      {
+        line = __LINE__;
+        goto GDS_OUT_ERROR;
+      }
+    }
+
+    if(devparms->triggeredgesource== 5)
+    {
+      usleep(TMC_GDS_DELAY);
+
+      if(tmc_write(":TRIG:EDGE:SOUR EXT5") != 20)
+      {
+        line = __LINE__;
+        goto GDS_OUT_ERROR;
+      }
+    }
+
+    if(devparms->triggeredgesource== 6)
+    {
+      usleep(TMC_GDS_DELAY);
+
+      if(tmc_write(":TRIG:EDGE:SOUR AC") != 18)
+      {
+        line = __LINE__;
+        goto GDS_OUT_ERROR;
+      }
+    }
+  }
+  
   usleep(TMC_GDS_DELAY);
 
   if(tmc_write(":TRIG:HOLD?") != 11)
@@ -1212,9 +1370,17 @@ void read_settings_thread::run()
 
   usleep(TMC_GDS_DELAY);
 
-  if(devparms->modelserie != 1)
+  if((devparms->modelserie != 1) && (devparms->modelserie != 5))
   {
     if(tmc_write(":CALC:FFT:SPL?") != 14)
+    {
+      line = __LINE__;
+      goto GDS_OUT_ERROR;
+    }
+  }
+  else if (devparms->modelserie == 5)
+  {
+    if(tmc_write(":MATH1:FFT:SPL?") != 15)
     {
       line = __LINE__;
       goto GDS_OUT_ERROR;
@@ -1239,7 +1405,7 @@ void read_settings_thread::run()
 
   usleep(TMC_GDS_DELAY);
 
-  if(devparms->modelserie != 1)
+  if((devparms->modelserie != 1) && (devparms->modelserie != 5))
   {
     if(tmc_write(":CALC:MODE?") != 11)
     {
@@ -1260,6 +1426,48 @@ void read_settings_thread::run()
     else
     {
       devparms->math_fft = 0;
+    }
+  }
+  else if (devparms->modelserie == 5)
+  {
+    if(tmc_write(":MATH1:DISP?") != 12)
+    {
+      line = __LINE__;
+      goto GDS_OUT_ERROR;
+    }
+    
+    if(tmc_read() < 1)
+    {
+      line = __LINE__;
+      goto GDS_OUT_ERROR;
+    }
+
+    devparms->math_fft = atoi(device->buf);
+
+    if(devparms->math_fft == 1)
+    {
+      usleep(TMC_GDS_DELAY);
+
+      if(tmc_write(":MATH1:OPER?") != 12)
+      {
+        line = __LINE__;
+        goto GDS_OUT_ERROR;
+      }
+
+      if(tmc_read() < 1)
+      {
+        line = __LINE__;
+        goto GDS_OUT_ERROR;
+      }
+
+      if(!strcmp(device->buf, "FFT"))
+      {
+        devparms->math_fft = 1;
+      }
+      else
+      {
+        devparms->math_fft = 0;
+      }
     }
   }
   else
@@ -1307,9 +1515,17 @@ void read_settings_thread::run()
 
   usleep(TMC_GDS_DELAY);
 
-  if(devparms->modelserie != 1)
+  if((devparms->modelserie != 1) && (devparms->modelserie != 5))
   {
     if(tmc_write(":CALC:FFT:VSM?") != 14)
+    {
+      line = __LINE__;
+      goto GDS_OUT_ERROR;
+    }
+  }
+  else if (devparms->modelserie == 5)
+  {
+    if(tmc_write(":MATH1:FFT:UNIT?") != 16)
     {
       line = __LINE__;
       goto GDS_OUT_ERROR;
@@ -1349,9 +1565,17 @@ void read_settings_thread::run()
 
   usleep(TMC_GDS_DELAY);
 
-  if(devparms->modelserie != 1)
+  if((devparms->modelserie != 1) && (devparms->modelserie != 5))
   {
     if(tmc_write(":CALC:FFT:SOUR?") != 15)
+    {
+      line = __LINE__;
+      goto GDS_OUT_ERROR;
+    }
+  }
+  else if (devparms->modelserie == 5)
+  {
+    if(tmc_write(":MATH1:FFT:SOUR?") != 16)
     {
       line = __LINE__;
       goto GDS_OUT_ERROR;
@@ -1397,7 +1621,7 @@ void read_settings_thread::run()
 
   devparms->current_screen_sf = 100.0 / devparms->timebasescale;
 
-  if(devparms->modelserie != 1)
+  if((devparms->modelserie != 1) && (devparms->modelserie != 5))
   {
     if(tmc_write(":CALC:FFT:HSP?") != 14)
     {
@@ -1439,6 +1663,22 @@ void read_settings_thread::run()
 //                break;
 //     }
   }
+  else if (devparms->modelserie == 5)
+  {
+    if(tmc_write(":MATH1:FFT:HSC?") != 15)
+    {
+      line = __LINE__;
+      goto GDS_OUT_ERROR;
+    }
+  
+    if(tmc_read() < 1)
+    {
+      line = __LINE__;
+      goto GDS_OUT_ERROR;
+    }
+
+    devparms->math_fft_hscale = atof(device->buf);
+  }
   else
   {
     if(tmc_write(":MATH:FFT:HSC?") != 14)
@@ -1458,9 +1698,17 @@ void read_settings_thread::run()
 
   usleep(TMC_GDS_DELAY);
 
-  if(devparms->modelserie != 1)
+  if((devparms->modelserie != 1) && (devparms->modelserie != 5))
   {
     if(tmc_write(":CALC:FFT:HCEN?") != 15)
+    {
+      line = __LINE__;
+      goto GDS_OUT_ERROR;
+    }
+  }
+  else if (devparms->modelserie == 5)
+  {
+    if(tmc_write(":MATH1:FFT:HCEN?") != 16)
     {
       line = __LINE__;
       goto GDS_OUT_ERROR;
@@ -1485,9 +1733,25 @@ void read_settings_thread::run()
 
   usleep(TMC_GDS_DELAY);
 
-  if(devparms->modelserie != 1)
+  if((devparms->modelserie != 1) && (devparms->modelserie != 5))
   {
     if(tmc_write(":CALC:FFT:VOFF?") != 15)
+    {
+      line = __LINE__;
+      goto GDS_OUT_ERROR;
+    }
+
+    if(tmc_read() < 1)
+    {
+      line = __LINE__;
+      goto GDS_OUT_ERROR;
+    }
+
+    devparms->fft_voffset = atof(device->buf);
+  }
+  else if (devparms->modelserie == 5)
+  {
+    if(tmc_write(":MATH1:OFFS?") != 12)
     {
       line = __LINE__;
       goto GDS_OUT_ERROR;
@@ -1520,7 +1784,7 @@ void read_settings_thread::run()
 
   usleep(TMC_GDS_DELAY);
 
-  if(devparms->modelserie != 1)
+  if((devparms->modelserie != 1) && (devparms->modelserie != 5))
   {
     if(tmc_write(":CALC:FFT:VSC?") != 14)
     {
@@ -1542,6 +1806,22 @@ void read_settings_thread::run()
     {
       devparms->fft_vscale = atof(device->buf) * devparms->chanscale[devparms->math_fft_src];
     }
+  }
+  else if (devparms->modelserie == 5)
+  {
+    if(tmc_write(":MATH1:SCAL?") != 12)
+    {
+      line = __LINE__;
+      goto GDS_OUT_ERROR;
+    }
+
+    if(tmc_read() < 1)
+    {
+      line = __LINE__;
+      goto GDS_OUT_ERROR;
+    }
+
+    devparms->fft_vscale = atof(device->buf);
   }
   else
   {
@@ -1681,9 +1961,17 @@ void read_settings_thread::run()
 
   usleep(TMC_GDS_DELAY);
 
-  if(devparms->modelserie != 1)
+  if((devparms->modelserie != 1) && (devparms->modelserie != 5))
   {
     if(tmc_write(":BUS1:SPI:OFFS?") != 15)
+    {
+      line = __LINE__;
+      goto GDS_OUT_ERROR;
+    }
+  }
+  else if(devparms->modelserie == 5)
+  {
+    if(tmc_write(":BUS1:POS?") != 10)
     {
       line = __LINE__;
       goto GDS_OUT_ERROR;
@@ -1708,9 +1996,17 @@ void read_settings_thread::run()
 
   usleep(TMC_GDS_DELAY);
 
-  if(devparms->modelserie != 1)
+  if((devparms->modelserie != 1) && (devparms->modelserie != 5))
   {
     if(tmc_write(":BUS1:SPI:MISO:THR?") != 19)
+    {
+      line = __LINE__;
+      goto GDS_OUT_ERROR;
+    }
+  }
+  else if(devparms->modelserie == 5)
+  {
+    if(tmc_write(":BUS1:THR? MISO") != 15)
     {
       line = __LINE__;
       goto GDS_OUT_ERROR;
@@ -1735,9 +2031,17 @@ void read_settings_thread::run()
 
   usleep(TMC_GDS_DELAY);
 
-  if(devparms->modelserie != 1)
+  if((devparms->modelserie != 1) && (devparms->modelserie != 5))
   {
     if(tmc_write(":BUS1:SPI:MOSI:THR?") != 19)
+    {
+      line = __LINE__;
+      goto GDS_OUT_ERROR;
+    }
+  }
+  else if(devparms->modelserie == 5)
+  {
+    if(tmc_write(":BUS1:THR? MOSI") != 15)
     {
       line = __LINE__;
       goto GDS_OUT_ERROR;
@@ -1762,9 +2066,17 @@ void read_settings_thread::run()
 
   usleep(TMC_GDS_DELAY);
 
-  if(devparms->modelserie != 1)
+  if((devparms->modelserie != 1) && (devparms->modelserie != 5))
   {
     if(tmc_write(":BUS1:SPI:SCLK:THR?") != 19)
+    {
+      line = __LINE__;
+      goto GDS_OUT_ERROR;
+    }
+  }
+  else if(devparms->modelserie == 5)
+  {
+    if(tmc_write(":BUS1:THR? CLK") != 14)
     {
       line = __LINE__;
       goto GDS_OUT_ERROR;
@@ -1791,10 +2103,21 @@ void read_settings_thread::run()
 
   if(devparms->modelserie != 1)
   {
-    if(tmc_write(":BUS1:SPI:SS:THR?") != 17)
+    if(devparms->modelserie == 5)
     {
-      line = __LINE__;
-      goto GDS_OUT_ERROR;
+      if(tmc_write(":BUS1:THR? CS") != 13)
+      {
+        line = __LINE__;
+        goto GDS_OUT_ERROR;
+      }
+    }
+    else
+    {
+      if(tmc_write(":BUS1:SPI:SS:THR?") != 17)
+      {
+        line = __LINE__;
+        goto GDS_OUT_ERROR;
+      }
     }
   }
   else
@@ -1818,10 +2141,21 @@ void read_settings_thread::run()
   {
     usleep(TMC_GDS_DELAY);
 
-    if(tmc_write(":BUS1:RS232:TTHR?") != 17)
+    if(devparms->modelserie == 5)
     {
-      line = __LINE__;
-      goto GDS_OUT_ERROR;
+      if(tmc_write(":BUS1:THR? TX") != 13)
+      {
+        line = __LINE__;
+        goto GDS_OUT_ERROR;
+      }
+    }
+    else
+    {
+      if(tmc_write(":BUS1:RS232:TTHR?") != 17)
+      {
+        line = __LINE__;
+        goto GDS_OUT_ERROR;
+      }
     }
 
     if(tmc_read() < 1)
@@ -1835,10 +2169,21 @@ void read_settings_thread::run()
 
     usleep(TMC_GDS_DELAY);
 
-    if(tmc_write(":BUS1:RS232:RTHR?") != 17)
+    if(devparms->modelserie == 5)
     {
-      line = __LINE__;
-      goto GDS_OUT_ERROR;
+      if(tmc_write(":BUS1:THR? RX") != 13)
+      {
+        line = __LINE__;
+        goto GDS_OUT_ERROR;
+      }
+    }
+    else
+    {
+      if(tmc_write(":BUS1:RS232:RTHR?") != 17)
+      {
+        line = __LINE__;
+        goto GDS_OUT_ERROR;
+      }
     }
 
     if(tmc_read() < 1)
@@ -2619,6 +2964,11 @@ void read_settings_thread::run()
         goto GDS_OUT_ERROR;
       }
   }
+  else if (devparms->modelserie == 5)
+  {
+    devparms->func_wrec_enable = 0;
+  }
+  
   else
   {
     if(tmc_write(":FUNC:WRM?") != 10)

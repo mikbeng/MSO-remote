@@ -1087,7 +1087,7 @@ void UI_Mainwindow::acqButtonClicked()
 
   submenumemdepth.setTitle("Mem Depth");
   submenumemdepth.addAction("Auto",  this, SLOT(set_memdepth_auto()));
-  if(devparms.modelserie == 6 || devparms.modelserie == 4)
+  if(devparms.modelserie == 6 || devparms.modelserie == 4 || devparms.modelserie == 5)
   {
     if(!dual)
     {
@@ -2271,7 +2271,7 @@ void UI_Mainwindow::chan_menu()
   submenubwl.setTitle("BWL");
   submenubwl.addAction("Off",    this, SLOT(chan_bwl_off()));
   submenubwl.addAction("20MHz",  this, SLOT(chan_bwl_20()));
-  if(devparms.modelserie == 4)
+  if(devparms.modelserie == 4 || devparms.modelserie == 5)
   {
     if(devparms.bandwidth >= 200)
     {
@@ -2298,7 +2298,7 @@ void UI_Mainwindow::chan_menu()
       actionList[1]->setCheckable(true);
       actionList[1]->setChecked(true);
     }
-    else if(devparms.modelserie == 4)
+    else if(devparms.modelserie == 4 || devparms.modelserie == 5)
       {
         if(devparms.chanbwlimit[devparms.activechannel] == 100)
         {
@@ -3743,7 +3743,7 @@ void UI_Mainwindow::trigMenuButtonClicked()
   }
   submenusource.addAction("AC Line", this, SLOT(trigger_source_acl()));
   actionList = submenusource.actions();
-  if(devparms.modelserie == 6 || devparms.modelserie == 4)
+  if(devparms.modelserie == 6 || devparms.modelserie == 4 || devparms.modelserie == 5)
   {
     for(i=0; i<7; i++)
     {

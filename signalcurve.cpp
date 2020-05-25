@@ -349,7 +349,7 @@ void SignalCurve::drawWidget(QPainter *painter, int curve_w, int curve_h)
   {
     v_sense = -((double)curve_h / 256.0);
   }
-  else if(devparms->modelserie == 4)
+  else if(devparms->modelserie == 4 || devparms->modelserie == 5)
     {
       v_sense = -((double)curve_h / (32.0 * devparms->vertdivisions));
     }

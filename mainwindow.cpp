@@ -998,6 +998,15 @@ void UI_Mainwindow::get_device_model(const char *str)
     devparms.modelserie = 4;
   }
 
+  if(!strcmp(str, "MSO5074"))
+  {
+    devparms.channel_cnt = 4;
+
+    devparms.bandwidth = 350;
+
+    devparms.modelserie = 5;
+  }
+
   if(!strcmp(str, "DS2072A"))
   {
     devparms.channel_cnt = 2;
@@ -1219,6 +1228,13 @@ void UI_Mainwindow::get_device_model(const char *str)
     if(devparms.use_extra_vertdivisions)  devparms.vertdivisions = 10;
 
     devparms.hordivisions = 12;
+  }
+
+  if(devparms.modelserie == 5)
+  {
+    if(devparms.use_extra_vertdivisions)  devparms.vertdivisions = 10;
+
+    devparms.hordivisions = 8;
   }
 
   if(devparms.channel_cnt && devparms.bandwidth && devparms.modelserie)
