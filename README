@@ -1,4 +1,4 @@
-#This is a fork from the original DSRemote code that can be found here:  
+# This is a fork from the original DSRemote code that can be found here:  
 https://www.teuniz.net/DSRemote/  
 
 It contains some modifications to support MSO5000 series. Needs more testing, since some functions are not working..
